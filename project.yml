@@ -1,0 +1,31 @@
+# Generate the Xcode project with XcodeGen (brew install xcodegen; xcodegen generate).
+name: RVPMessenger
+options:
+  bundleIdPrefix: zone.bahamut
+  deploymentTarget:
+    iOS: "16.0"
+    macOS: "13.0"
+packages:
+  RVPKit:
+    path: .
+targets:
+  RVPMessenger:
+    type: application
+    supportedDestinations: [iOS, macOS]
+    sources:
+      - path: App
+        excludes:
+          - "*.plist"
+          - "*.entitlements"
+    dependencies:
+      - package: RVPKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: zone.bahamut.rvpmessenger
+        INFOPLIST_FILE: App/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        "CODE_SIGN_ENTITLEMENTS[sdk=macosx*]": App/macOS.entitlements
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_VERSION: "5.9"
+        TARGETED_DEVICE_FAMILY: "1,2"
