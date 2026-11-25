@@ -1,0 +1,22 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: RVPKit tests
+        run: swift test
+      - name: Generate Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+      - name: Build app (macOS)
+        run: xcodebuild -project RVPMessenger.xcodeproj -scheme RVPMessenger -destination 'generic/platform=macOS' CODE_SIGNING_ALLOWED=NO build
+      - name: Build app (iOS)
+        run: xcodebuild -project RVPMessenger.xcodeproj -scheme RVPMessenger -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build
