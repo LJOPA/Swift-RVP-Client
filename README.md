@@ -27,6 +27,17 @@ Library tests (parsing and encoding only, no server needed):
 swift test
 ```
 
+## Command-line probe
+
+`rvp-probe` signs in from the terminal and prints a full protocol trace (headers and XML, never the password):
+
+```sh
+RVP_SIGNIN=alias@enterprise.bahamut.zone RVP_CONTACTS=someone \
+  swift run rvp-probe   # then type the password and press Return
+```
+
+Other options (server, NTLM user, test message, listen time) are listed in `Sources/rvp-probe/Probe.swift`.
+
 ## First run
 
 1. Sign-in name: `alias@enterprise.bahamut.zone`. The server defaults to `im.enterprise.bahamut.zone`.

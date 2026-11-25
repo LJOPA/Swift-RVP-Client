@@ -6,9 +6,11 @@ let package = Package(
     platforms: [.macOS(.v13), .iOS(.v16)],
     products: [
         .library(name: "RVPKit", targets: ["RVPKit"]),
+        .executable(name: "rvp-probe", targets: ["rvp-probe"]),
     ],
     targets: [
         .target(name: "RVPKit"),
+        .executableTarget(name: "rvp-probe", dependencies: ["RVPKit"]),
         .testTarget(name: "RVPKitTests", dependencies: ["RVPKit"]),
     ]
 )

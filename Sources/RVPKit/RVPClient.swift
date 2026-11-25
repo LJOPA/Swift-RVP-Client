@@ -55,8 +55,12 @@ public actor RVPClient {
     private var renewTask: Task<Void, Never>?
     private var signedIn = false
 
-    public init(account: RVPAccount, password: String) {
+    /// When true, request, response and callback bodies go to the log as well.
+    private let trace: Bool
+
+    public init(account: RVPAccount, password: String, trace: Bool = false) {
         self.account = account
+        self.trace = trace
         self.http = RVPHTTPClient(user: account.effectiveAuthUser, password: password)
         var cont: AsyncStream<RVPEvent>.Continuation!
         self.events = AsyncStream { cont = $0 }
@@ -254,6 +258,10 @@ public actor RVPClient {
 
     private func handleIncoming(_ req: RVPIncomingRequest) {
         log("← \(req.method) \(req.path) (\(req.body.count) bytes)")
+        if trace {
+            log("  headers: \(req.headers)")
+            if !req.body.isEmpty { log(String(decoding: req.body, as: UTF8.self)) }
+        }
         guard req.method.uppercased() == "NOTIFY", !req.body.isEmpty else { return }
         let items: [RVPNotification]
         do {
@@ -312,9 +320,17 @@ public actor RVPClient {
         h[RVPHeader.fromPrincipal] = account.principal.absoluteString
         if body != nil, h["Content-Type"] == nil { h["Content-Type"] = "text/xml" }
         log("→ \(method) \(url.absoluteString)")
+        if trace {
+            log("  headers: \(h)")
+            if let body, !body.isEmpty { log(String(decoding: body, as: UTF8.self)) }
+        }
         let r = try await http.send(method, to: url, headers: h, body: body,
                                     notificationsVersion: account.notificationsVersion)
         log("  \(r.status)")
+        if trace {
+            log("  response headers: \(r.headers)")
+            if !r.body.isEmpty { log(String(decoding: r.body.prefix(4000), as: UTF8.self)) }
+        }
         return r
     }
 
