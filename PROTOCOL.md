@@ -6,7 +6,22 @@ Sources, in order of trust:
 2. **draft-osborne-rvp-00** (June 2000, expired Internet-Draft from Microsoft). Describes Exchange 2000 IM. Several XML examples in it are malformed.
 3. Guesses, marked **GUESS** below and in code comments.
 
-Nothing here has been tested against Luke's server yet.
+## Confirmed against Luke's server (2026-11-25, rvp-probe run 2)
+
+Server: Microsoft-IIS/5.0 on Exchange 2000.
+
+- `RVP-Notifications-Version: 0.2` is what the server sends back.
+- The IM virtual server is bound to the host header `im.enterprise.bahamut.zone`. Requests to the bare IP reach the default site and get `501 Not Implemented`, so clients must resolve and use the hostname.
+- The domain's Windows 2000 DNS answers FORMERR to EDNS queries, so modern resolvers fail unless EDNS is off or the name is pinned.
+- Self SUBSCRIBE (pragma/notify + Call-Back) → 200 with `Subscription-Id` and `Subscription-Lifetime: 14000`.
+- PROPPATCH leased presence → 207 echoing the state, plus `<r:view-id>`.
+- PROPFIND `d:displayname` → 207.
+- SUBSCRIPTIONS → 200 with `<r:subscriptions/>`.
+- PROPPATCH offline (short form with view-id) → 207. UNSUBSCRIBE self → 200.
+- NTLM through URLSession signs in with `ENTERPRISE\user`. The trace showed no explicit 401 round trip, so URLSession handled the handshake internally.
+- Responses carry `Connection: close`.
+
+Not yet tested: contact SUBSCRIBE, outgoing and incoming NOTIFY, and callback delivery across subnets.
 
 ## Model
 
